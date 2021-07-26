@@ -36,26 +36,19 @@ class Body {
   }
 
   movePerVector(dt, direction = 1) {
-    this.x += this.vx * dt * direction;
-    this.y += this.vy * dt * direction;
+    this.pos = this.pos.add(this.v.mul(dt * direction))
   }
   
   changeVectorsByInfluence(dt, b) {
     if (!(b instanceof Body)) throw new TypeError('Argument is not a Body');
-    const [dx, dy, dr] = this.distance(b);
+    const dr = this.distance(b);
   
-    const a = b.mass / (dr ** 2);
-    this.vx += (a * dt * dx) / dr;
-    this.vy += (a * dt * dy) / dr;
+    const a = b.mass / (dr.abs() ** 2);
+  
+    this.v = this.v.add(dr.mul(a * dt / dr.abs()))
   }
   
   distance(b) {
-    const [dx, dy] = ['x', 'y']
-      .map(c => b[c] - this[c])
-      .map(d => Math.abs(d) > PLANK ? d : PLANK * Math.sign(d));
-      
-    const dr = Math.hypot(dx, dy);
-    
-    return [dx, dy, dr];
+    return b.pos.sub(this.pos);
   }
 }

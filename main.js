@@ -1,15 +1,19 @@
 function main() {
- console.log(newton(x => x**2 - 4*x + 4, x => 2*x - 4))
+  const w = CanvasField2d.width;
+  const h = CanvasField2d.height;
   const field = new CanvasField2d({
     bodies: [
       new Body(500, 1, [100, 100], [0, 0]),
       new Body(500, 1, [200, 100], [0, 0]),
-      new Body(2000, 1, [250, 300], [0, -10]),
-      new Body(50, 1, [100, 200], [30, 0], 7),
-      new Body(70, 1, [200, 200], [-30, 0], 7),
+      new Body(700, 1, [250, 300], [6, -19]),
+      new Body(500, 1, [100, 200], [30, 0]),
+      new Body(700, 1, [200, 200], [-30, 0]),
     ],
     walls: [
-      [0, 0, 1, 10000]
+      [0, 0, 0, h],
+      [0, 0, w, 0],
+      [w, 0, 0, h],
+      [0, h, w, 0],
     ],
     fieldId: 'canvas',
     scale: 1,

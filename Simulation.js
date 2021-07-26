@@ -39,12 +39,12 @@ class Simulation {
         if (!this.isCirclesCollision(a, b) || a === b) continue;
         
         console.log(`hit, step: ${this.step}`)
-        const dt = this.dt * this.timeSpeed;
-        a.movePerVector(dt, -1);
-        b.movePerVector(dt, -1);
+        const dt = this.calcHitTime(a, b);
+        a.movePerVector(dt);
+        b.movePerVector(dt);
         this.hit(a, b)
-        a.movePerVector(dt, 1);
-        b.movePerVector(dt, 1);
+        a.movePerVector(-dt);
+        b.movePerVector(-dt);
         i = j = 0;
         k++;
       }
@@ -58,8 +58,14 @@ class Simulation {
     const M = a.mass + b.mass;
     const d = x1.sub(x2).abs() ** 2;
     
-    a.v = v1.sub(v1.sub(v2).mul(x1.sub(x2)).mul(1 / d).mul(x1.sub(x2)).mul(2 * b.mass / M))
-    b.v = v2.sub(v2.sub(v1).mul(x2.sub(x1)).mul(1 / d).mul(x2.sub(x1)).mul(2 * a.mass / M))
+    a.v = v1.sub(v1.sub(v2).mul(x1.sub(x2)).div(d).mul(x1.sub(x2)).mul(2 * b.mass / M))
+    b.v = v2.sub(v2.sub(v1).mul(x2.sub(x1)).div(d).mul(x2.sub(x1)).mul(2 * a.mass / M))
+  }
+  
+  calcHitTime(a, b) {
+    const f = t => b.v.sub(a.v).mul(t).add(b.pos).sub(a.pos).abs() - a.radius - b.radius;
+    const dt = newton({f});
+    return isNaN(dt) ? -this.dt * this.timeSpeed : dt;
   }
 
   moveBodiesPerVectors() {
@@ -75,8 +81,7 @@ class Simulation {
   }
 
   isCirclesCollision(a, b) {
-    const [,, dr] = a.distance(b);
-    return dr <= a.radius + b.radius;
+    return a.distance(b).abs() <= a.radius + b.radius;
   }
 
   start() {
@@ -91,7 +96,7 @@ class Simulation {
     this.step++
     this.moveBodiesPerVectors();
     if (this.doHit) this.hitBodiesPerCollisions();
-    if (this.gravity || true) this.changeAllVectorsByInfluence();
+    if (this.gravity || !true) this.changeAllVectorsByInfluence();
     this.field.draw();
   }
 }

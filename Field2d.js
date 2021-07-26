@@ -1,16 +1,18 @@
 const REFRESH_RATE_HZ = 240;
 
 class Field2d {
-  constructor({ bodies, walls, scale, width = 0, height = 0 }) {
+  constructor({ bodies = [], walls = [], scale, width, height }) {
     this.scale = scale || 1;
     this.width = width;
     this.height = height;
-    this.bodies = bodies || [];
-    this.walls = walls || [];
+    this.bodies = bodies;
+    this.walls = walls.map(w => [...w, rainbow()]);
     this.timePerDraw = 1000 / REFRESH_RATE_HZ;
     this.prevDraw = Date.now() - this.timePerDraw;
     for (const b of this.bodies) b.field = this;
   }
+  static width = new Number()
+  static height = new Number()
   body(mass, hardness, pos, vec, density = 1) {
     const b = new Body(mass, hardness, pos, vec, density, this);
     this.bodies.push(b);
@@ -31,7 +33,7 @@ class CanvasField2d extends Field2d {
     canvas.width = this.width;
     canvas.height = this.height;
     this.ctx = canvas.getContext('2d');
-    this.ctx.scale(this.scale, this.scale)
+    this.ctx.scale(this.scale, this.scale);
   }
   
   getStyle(tagName, style) {
@@ -56,8 +58,13 @@ class CanvasField2d extends Field2d {
     this.ctx.fill(circle);
   }
   
-  drawWall([x, y, w, h]) {
-    this.ctx.fillStyle = 'tomato';
+  drawWall(args) {
+    const [x, y, w, h, color] = args.map(i => {
+      if (i === CanvasField2d.width) return (this.width - 1) / this.scale;
+      if (i === CanvasField2d.height) return (this.height - 1) / this.scale;
+      return i;
+    })
+    this.ctx.fillStyle = color;
     this.ctx.fillRect(x, y, w || 1 / this.scale, h || 1 / this.scale)
   }
 }
