@@ -11,8 +11,8 @@ class Field2d {
     this.prevDraw = Date.now() - this.timePerDraw;
     for (const b of this.bodies) b.field = this;
   }
-  static width = new Number()
-  static height = new Number()
+  static width = Symbol('width')
+  static height = Symbol('height')
   body(mass, hardness, pos, vec, density = 1) {
     const b = new Body(mass, hardness, pos, vec, density, this);
     this.bodies.push(b);

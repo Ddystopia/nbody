@@ -5,9 +5,10 @@ function main() {
     bodies: [
       new Body(500, 1, [100, 100], [0, 0]),
       new Body(500, 1, [200, 100], [0, 0]),
-      new Body(700, 1, [250, 300], [6, -19]),
-      new Body(500, 1, [100, 200], [30, 0]),
-      new Body(700, 1, [200, 200], [-30, 0]),
+      new Body(700, 1, [200, 300], [0, -150]),
+      new Body(500, 0, [300, 200], [-30, 0]),
+      new Body(700, 0, [100, 200], [30, 0]),
+      new Body(700, 1, [210, 210], [35, 0]),
     ],
     walls: [
       [0, 0, 0, h],
@@ -23,6 +24,7 @@ function main() {
     field,
     timeSpeed: 1,
     doHit: true,
+    gravity: false,
   });
 
   // debug

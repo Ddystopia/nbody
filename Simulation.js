@@ -38,32 +38,53 @@ class Simulation {
         const [a, b] = [this.bodies[i], this.bodies[j]];
         if (!this.isCirclesCollision(a, b) || a === b) continue;
         
-        console.log(`hit, step: ${this.step}`)
+   //     console.log(`hit, step: ${this.step}`)
         const dt = this.calcHitTime(a, b);
         a.movePerVector(dt);
-        b.movePerVector(dt);
+        b.movePerVector(dt);   
+   //     console.log(this.isCirclesCollision(a, b))
+        console.log(a.distance(b).abs() - a.radius - b.radius)  
         this.hit(a, b)
         a.movePerVector(-dt);
         b.movePerVector(-dt);
-        i = j = 0;
+      //  i = j = 0;
         k++;
       }
     }
   }
   
   hit(a, b) {
+  /*  const tmp = a.v.copy()
+    a.v = b.v
+    b.v = tmp
+    return*/
     const [x1, x2] = [a.pos.copy(), b.pos.copy()];
     const [v1, v2] = [a.v.copy(), b.v.copy()];
     
     const M = a.mass + b.mass;
     const d = x1.sub(x2).abs() ** 2;
+    const k = (a.hardness + b.hardness) / 2 + 1;
     
-    a.v = v1.sub(v1.sub(v2).mul(x1.sub(x2)).div(d).mul(x1.sub(x2)).mul(2 * b.mass / M))
-    b.v = v2.sub(v2.sub(v1).mul(x2.sub(x1)).div(d).mul(x2.sub(x1)).mul(2 * a.mass / M))
+    a.v = v1.sub(v1.sub(v2).mul(x1.sub(x2)).div(d).mul(x1.sub(x2)).mul(k * b.mass / M))
+    b.v = v2.sub(v2.sub(v1).mul(x2.sub(x1)).div(d).mul(x2.sub(x1)).mul(k * a.mass / M))
+    
+    const h = a.hits[b] = b.hits[a] = a.hits[b] || [];
+    if (this.step - h[h.length - 2] < 3) 
+      a.v = b.v.copy()
+      
+    h.push(this.step)
   }
   
   calcHitTime(a, b) {
-    const f = t => b.v.sub(a.v).mul(t).add(b.pos).sub(a.pos).abs() - a.radius - b.radius;
+    const c = 1;
+    const r = a.radius + b.radius;
+    /*const dt2 = (Math.sqrt((2*u*x - 2*u*X + 2*U*y - 2*U*Y - 2*v*x + 2*v*X - 2*V*y + 2*V*Y)**2 -
+    4*(u**2 - 2*u*v + U**2 - 2*U*V + v**2 + V**2) *
+    (x**2 - (r + c)**2 - 2*x*X + X**2 + y**2 - 2*y*Y + Y**2)) -
+    2*u*x + 2*u*X - 2*U*y + 2*U*Y + 2*v*x - 2*v*X + 2*V*y - 2*V*Y) /
+    (2*(u**2 - 2*u*v + U**2 - 2*U*V + v**2 + V**2))*/
+    
+    const f = t => b.v.sub(a.v).mul(t).add(b.pos).sub(a.pos).abs() - r - c;
     const dt = newton({f});
     return isNaN(dt) ? -this.dt * this.timeSpeed : dt;
   }

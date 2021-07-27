@@ -18,18 +18,13 @@ class Body {
     this.v = new Vector(...v);
 
     this.color = rainbow();
+    
+    this.hits = {};
   }
   static idCount = 0
   
-  
   get x() { return this.pos[0] }
   get y() { return this.pos[1] }
-  get vx() { return this.v[0] }
-  get vy() { return this.v[1] }
-  set x(a) { this.pos[0] = a }
-  set y(a) { this.pos[1] = a }
-  set vx(a) { this.v[0] = a }
-  set vy(a) { this.v[1] = a }
 
   get radius() {
     return Math.sqrt(Math.abs(this.mass / 100) * this.density / Math.PI);
@@ -44,7 +39,6 @@ class Body {
     const dr = this.distance(b);
   
     const a = b.mass / (dr.abs() ** 2);
-  
     this.v = this.v.add(dr.mul(a * dt / dr.abs()))
   }
   
