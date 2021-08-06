@@ -6,10 +6,9 @@ class Field2d {
     this.width = width;
     this.height = height;
     this.bodies = bodies;
-    this.walls = walls.map(w => [...w, rainbow()]);
+    this.walls = walls;
     this.timePerDraw = 1000 / REFRESH_RATE_HZ;
     this.prevDraw = Date.now() - this.timePerDraw;
-    for (const b of this.bodies) b.field = this;
   }
   static width = Symbol('width')
   static height = Symbol('height')
@@ -17,6 +16,11 @@ class Field2d {
     const b = new Body(mass, hardness, pos, vec, density, this);
     this.bodies.push(b);
     return b;
+  }
+  wall(x0, y0, x, y) {
+    const w = new Wall(x0, y0, x, y);
+    this.walls.push(w);
+    return w;
   }
   canDraw() { 
     return Date.now() - this.prevDraw > this.timePerDraw;
@@ -58,13 +62,16 @@ class CanvasField2d extends Field2d {
     this.ctx.fill(circle);
   }
   
-  drawWall(args) {
-    const [x, y, w, h, color] = args.map(i => {
+  drawWall({ r, d, color }) {
+    const c = i => {
       if (i === CanvasField2d.width) return (this.width - 1) / this.scale;
       if (i === CanvasField2d.height) return (this.height - 1) / this.scale;
       return i;
-    })
-    this.ctx.fillStyle = color;
-    this.ctx.fillRect(x, y, w || 1 / this.scale, h || 1 / this.scale)
+    }
+    const wall = new Path2D();
+    wall.moveTo(...r.map(c));
+    wall.lineTo(...d.map(c).add(r.map(c)));
+    this.ctx.strokeStyle = color;
+    this.ctx.stroke(wall);
   }
 }

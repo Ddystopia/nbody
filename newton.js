@@ -12,3 +12,7 @@ function newton({f, Df = null, x0 = -1e-10, eps = 1e-12, max_iter = 1e4}) {
   }
   return x;
 }
+
+function arc(f) {
+  return y => newton({ f: x => f(x) - y })
+}

@@ -11,10 +11,10 @@ function main() {
       new Body(700, 1, [210, 210], [35, 0]),
     ],
     walls: [
-      [0, 0, 0, h],
-      [0, 0, w, 0],
-      [w, 0, 0, h],
-      [0, h, w, 0],
+      new Wall(0, 0, 0, h),
+      new Wall(0, 0, w, 0),
+      new Wall(w, h, 0, h),
+      new Wall(w, h, w, 0),
     ],
     fieldId: 'canvas',
     scale: 1,
@@ -24,7 +24,7 @@ function main() {
     field,
     timeSpeed: 1,
     doHit: true,
-    gravity: false,
+    gravity: true,
   });
 
   // debug

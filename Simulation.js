@@ -12,71 +12,57 @@ class Simulation {
    *
    */
 
-  constructor({ field, doHit, timeSpeed }) {
+  constructor({ field, doHit, timeSpeed, gravity }) {
     this.bodies = field.bodies;
     this.field = field;
     this.doHit = doHit;
+    this.gravity = gravity;
     this.workCycle = null;
     this.timeSpeed = timeSpeed;
     this.dt = STEP_DELTA / 1000;
     this.step = 0;
   }
 
-  /*
-   * @param {Body} a first body
-   * @param {Body} b second body
-   *
-   * @description Calculates influence of two objects and change their vectors.
-   *
-   * @throws TypeError
-   */
-
-
   hitBodiesPerCollisions() {
-    for (let i = 0, k = 0; i < this.bodies.length && k < 1000; i++) {
-      for (let j = 0; j < this.bodies.length; j++) {
+    for (let i = 0, k = 0; i < this.bodies.length; i++) {
+      for (let j = 0; j < this.bodies.length && k < 1000; j++, k++) {
         const [a, b] = [this.bodies[i], this.bodies[j]];
         if (!this.isCirclesCollision(a, b) || a === b) continue;
         
-   //     console.log(`hit, step: ${this.step}`)
-        const dt = this.calcHitTime(a, b);
+        console.log(`hit, step: ${this.step}`)
+        const dt = this.calcBodyHitTime(a, b);
         a.movePerVector(dt);
         b.movePerVector(dt);   
-   //     console.log(this.isCirclesCollision(a, b))
-        console.log(a.distance(b).abs() - a.radius - b.radius)  
-        this.hit(a, b)
+        this.hitBodies(a, b)
         a.movePerVector(-dt);
         b.movePerVector(-dt);
-      //  i = j = 0;
-        k++;
+    //    i = j = 0;
       }
+      for (let j = 0; j < this.field.walls.length; j++, k++) {
+      
     }
   }
   
-  hit(a, b) {
-  /*  const tmp = a.v.copy()
-    a.v = b.v
-    b.v = tmp
-    return*/
+  hitBodies(a, b) {
     const [x1, x2] = [a.pos.copy(), b.pos.copy()];
     const [v1, v2] = [a.v.copy(), b.v.copy()];
     
     const M = a.mass + b.mass;
-    const d = x1.sub(x2).abs() ** 2;
+    const d = x1.sub(x2).abs ** 2;
     const k = (a.hardness + b.hardness) / 2 + 1;
     
     a.v = v1.sub(v1.sub(v2).mul(x1.sub(x2)).div(d).mul(x1.sub(x2)).mul(k * b.mass / M))
     b.v = v2.sub(v2.sub(v1).mul(x2.sub(x1)).div(d).mul(x2.sub(x1)).mul(k * a.mass / M))
-    
-    const h = a.hits[b] = b.hits[a] = a.hits[b] || [];
-    if (this.step - h[h.length - 2] < 3) 
-      a.v = b.v.copy()
-      
-    h.push(this.step)
   }
   
-  calcHitTime(a, b) {
-    const c = 1;
+  hitBodyWall(b, w) {
+    b.v.angle = 2 * w.r.add(w.d).angle - b.v.angle;
+  }
+  
+  calcBodyHitTime(a, b) {
+    // return this.dt
+    // TODO: include acceleration of gravity
+    const c = .5;
     const r = a.radius + b.radius;
     /*const dt2 = (Math.sqrt((2*u*x - 2*u*X + 2*U*y - 2*U*Y - 2*v*x + 2*v*X - 2*V*y + 2*V*Y)**2 -
     4*(u**2 - 2*u*v + U**2 - 2*U*V + v**2 + V**2) *
@@ -84,9 +70,9 @@ class Simulation {
     2*u*x + 2*u*X - 2*U*y + 2*U*Y + 2*v*x - 2*v*X + 2*V*y - 2*V*Y) /
     (2*(u**2 - 2*u*v + U**2 - 2*U*V + v**2 + V**2))*/
     
-    const f = t => b.v.sub(a.v).mul(t).add(b.pos).sub(a.pos).abs() - r - c;
+    const f = t => b.v.sub(a.v).mul(t).add(b.pos).sub(a.pos).abs - r - c;
     const dt = newton({f});
-    return isNaN(dt) ? -this.dt * this.timeSpeed : dt;
+    return isNaN(dt) ? -2 * this.dt * this.timeSpeed : dt;
   }
 
   moveBodiesPerVectors() {
@@ -101,8 +87,12 @@ class Simulation {
     }
   }
 
+  isCircleWallCollision(b, w) {
+    return false;
+  }
+  
   isCirclesCollision(a, b) {
-    return a.distance(b).abs() <= a.radius + b.radius;
+    return a.distance(b).abs <= a.radius + b.radius;
   }
 
   start() {
@@ -117,7 +107,7 @@ class Simulation {
     this.step++
     this.moveBodiesPerVectors();
     if (this.doHit) this.hitBodiesPerCollisions();
-    if (this.gravity || !true) this.changeAllVectorsByInfluence();
+    if (this.gravity) this.changeAllVectorsByInfluence();
     this.field.draw();
   }
 }
