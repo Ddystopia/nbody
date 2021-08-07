@@ -24,7 +24,7 @@ function main() {
     field,
     timeSpeed: 1,
     doHit: true,
-    gravity: true,
+    gravity: !true,
   });
 
   // debug

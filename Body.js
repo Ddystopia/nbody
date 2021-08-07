@@ -1,14 +1,14 @@
 const PLANK = Number.EPSILON;
 
 class Body {
-  constructor(mass, hardness, pos, v, density = 1) {
+  constructor(mass, hardness, r, v, density = 1) {
     this.mass = mass * 100;
     this.density = density;
     this.hardness = hardness;
 
     this.id = Body.idCount += 1;
 
-    this.pos = new Vector(...pos);
+    this.r = new Vector(...r);
     this.v = new Vector(...v);
 
     this.color = Body.rainbow();
@@ -21,15 +21,15 @@ class Body {
     step: 4,
   });
   
-  get x() { return this.pos[0] }
-  get y() { return this.pos[1] }
+  get x() { return this.r[0] }
+  get y() { return this.r[1] }
 
   get radius() {
     return Math.sqrt(Math.abs(this.mass / 100) * this.density / Math.PI);
   }
 
   movePerVector(dt, direction = 1) {
-    this.pos = this.pos.add(this.v.mul(dt * direction))
+    this.r = this.r.add(this.v.mul(dt * direction))
   }
   
   changeVectorsByInfluence(dt, b) {
@@ -41,6 +41,7 @@ class Body {
   }
   
   distance(b) {
-    return b.pos.sub(this.pos);
+    return b.r.sub(this.r);
   }
 }
+

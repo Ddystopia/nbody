@@ -2,7 +2,7 @@ const COLOR_SIZE = 30_000;
 const COLOR_STEP = 1500;
 
 const rainbowGenerator = ({ shift = 0, step = 1 }) => {
-  const colors = new Array(COLOR_SIZE).fill("");
+  const colors = new Array(COLOR_SIZE).fill('');
 
   for (let i = 0, sinI = 0; i < COLOR_SIZE; i++, sinI += COLOR_STEP) {
     const red = sin_to_hex(sinI, (0 * Math.PI * 2) / 3); // 0 deg
@@ -21,5 +21,5 @@ function sin_to_hex(i, phase) {
   const int = Math.floor(sin * 127) + 128;
   const hex = int.toString(16);
 
-  return hex.length === 1 ? "0" + hex : hex;
+  return hex.length === 1 ? '0' + hex : hex;
 }
