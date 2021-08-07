@@ -68,14 +68,9 @@ class CanvasField2d extends Field2d {
   }
 
   drawWall({ r, d, color }) {
-    const c = i => {
-      if (i === CanvasField2d.width) return (this.width - 1) / this.scale;
-      if (i === CanvasField2d.height) return (this.height - 1) / this.scale;
-      return i;
-    };
     const wall = new Path2D();
-    wall.moveTo(...r.map(c));
-    wall.lineTo(...d.map(c).add(r.map(c)));
+    wall.moveTo(...r);
+    wall.lineTo(...d.add(r));
     this.ctx.strokeStyle = color;
     this.ctx.stroke(wall);
   }

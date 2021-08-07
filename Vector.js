@@ -7,12 +7,13 @@ class Vector extends Array {
 
   set angle(a) {
     const abs = this.abs;
-    this.r = new Vector(Math.sin(a), Math.cos(a)).mul(abs)
+    const v = new Vector(Math.cos(a), Math.sin(a)).mul(abs)
+    for (let i = 0; i < v.length; i++) this[i] = v[i]
   }
 
   get angle() {
     const angle = Math.acos(this.cos());
-    if (this.y < 0) return -angle;
+    if (this[1] < 0) return -angle;
     return angle;
   }
 
@@ -25,8 +26,8 @@ class Vector extends Array {
     this.r = n.r
   }
 
-  sin = () => this.r.div(this.abs())[1]
-  cos = () => this.r.div(this.abs())[0]
+  sin = () => this.div(this.abs)[1]
+  cos = () => this.div(this.abs)[0]
   tan = () => this.sin() / this.cos();
   cot = () => 1 / this.tan();
 

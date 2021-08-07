@@ -7,8 +7,12 @@ class Wall {
   }
 
   distance(b) {
-    return new Vector(1000, 2020)
+    const ap = this.r.sub(b.r);
+    const n = this.d.div(this.d.abs);
+
+    return ap.sub(ap.mul(n).mul(n));
   }
+  movePerVector() {}
 
   static rainbow = rainbowGenerator({
     shift: randomInteger(0, COLOR_SIZE),

@@ -45,7 +45,7 @@ class Simulation {
   }
 
   hitBodies(a, b) {
-    if (b instanceof Wall) return (b.v.angle = 2 * w.r.add(w.d).angle - b.v.angle);
+    if (b instanceof Wall) return (a.v.angle = 2 * b.d.angle - a.v.angle);
 
     const [x1, x2] = [a.r.copy(), b.r.copy()];
     const [v1, v2] = [a.v.copy(), b.v.copy()];
@@ -73,6 +73,7 @@ class Simulation {
   }
 
   calcHitTime(a, b) {
+    if (b instanceof Wall) return -2 * this.dt;
     // return this.dt
     // TODO: include acceleration of gravity
     const c = 0.5;
