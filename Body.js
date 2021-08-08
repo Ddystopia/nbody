@@ -29,7 +29,7 @@ class Body {
   }
 
   movePerVector(dt, direction = 1) {
-    this.r = this.r.add(this.v.mul(dt * direction))
+    this.r = this.r.add(this.v.dot(dt * direction))
   }
   
   changeVectorsByInfluence(dt, b) {
@@ -37,7 +37,7 @@ class Body {
     const dr = this.distance(b);
   
     const a = b.mass / (dr.abs ** 2);
-    this.v = this.v.add(dr.mul(a * dt / dr.abs))
+    this.v = this.v.add(dr.dot(a * dt / dr.abs))
   }
   
   distance(b) {

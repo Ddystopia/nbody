@@ -1,3 +1,5 @@
+// TODO: 3 dimentional logic
+
 class Vector extends Array {
   constructor(...v) {
     // super(...v)
@@ -7,8 +9,8 @@ class Vector extends Array {
 
   set angle(a) {
     const abs = this.abs;
-    const v = new Vector(Math.cos(a), Math.sin(a)).mul(abs)
-    for (let i = 0; i < v.length; i++) this[i] = v[i]
+    const v = new Vector(Math.cos(a), Math.sin(a)).dot(abs);
+    for (let i = 0; i < v.length; i++) this[i] = v[i];
   }
 
   get angle() {
@@ -22,12 +24,12 @@ class Vector extends Array {
   }
 
   set abs(abs) {
-    const n = this.mul(abs / this.abs);
-    this.r = n.r
+    const n = this.dot(abs / this.abs);
+    this.r = n.r;
   }
 
-  sin = () => this.div(this.abs)[1]
-  cos = () => this.div(this.abs)[0]
+  sin = () => this.dot(1 / this.abs)[1];
+  cos = () => this.dot(1 / this.abs)[0];
   tan = () => this.sin() / this.cos();
   cot = () => 1 / this.tan();
 
@@ -40,17 +42,16 @@ class Vector extends Array {
 
   sub(n) {
     const v = this.toVec(n);
-    return this.add(v.mul(-1));
+    return this.add(v.dot(-1));
   }
 
-  mul(n) {
+  distance(v) {
+    return new Vector(0, 0, v[0] * this[1] - this[0] * v[1]).dot(1 / v.abs);
+  }
+
+  dot(n) {
     const v = this.toVec(n);
     return this.map((x, i) => x * v[i]);
-  }
-
-  div(n) {
-    const v = this.toVec(n);
-    return this.mul(v.pow(-1));
   }
 
   pow = n => this.map(x => x ** n);
