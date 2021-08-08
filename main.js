@@ -14,8 +14,8 @@ function main() {
       new Wall(0, 0, 0, h),
       new Wall(0, 0, w, 0, 'tomato'),
       new Wall(w, 0, 0, h),
-      new Wall(0, h, 0, w),
-      new Wall(0, h / 2, w, h / 2)
+      new Wall(0, h, w, 0),
+      new Wall(0, h / 2, w / 4, 100)
     ],
     // walls: [
     //   new Wall(0, 0, 0, h),

@@ -6,6 +6,11 @@ class Wall {
   }
 
   distance(b) {
+    // it is line segment, not straight line
+    if (b.r[0] + b.radius < this.r[0]) return this.r.sub(b.r).add(b.radius);
+    if (b.r[0] - b.radius > this.r[0] + this.d[0])
+      return b.r.sub(this.r.add(this.d)).sub(b.radius);
+
     return this.r.sub(b.r).distance(this.d);
   }
 
