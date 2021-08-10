@@ -45,31 +45,38 @@ class Simulation {
   }
 
   hitBodies(a, b) {
-    if (b instanceof Wall) return (a.v.angle = 2 * b.d.angle - a.v.angle);
+    if (b instanceof Wall)
+      return (a.v = b.d
+        .mul(1 / b.d.abs ** 2)
+        .mul(2 * b.d.dot(a.v))
+        .sub(a.v));
 
     const [x1, x2] = [a.r.copy(), b.r.copy()];
     const [v1, v2] = [a.v.copy(), b.v.copy()];
 
-    const M = a.mass + b.mass;
-    const d = x1.sub(x2).abs ** 2;
+    const M = 1 / (a.mass + b.mass);
+    const d = x1.sub(x2).abs ** -2;
     const k = (a.hardness + b.hardness) / 2 + 1;
 
-    a.v = v1.sub(
-      v1
-        .sub(v2)
-        .dot(x1.sub(x2))
-        .dot(1 / d)
-        .dot(x1.sub(x2))
-        .dot((k * b.mass) / M)
-    );
-    b.v = v2.sub(
-      v2
-        .sub(v1)
-        .dot(x2.sub(x1))
-        .dot(1 / d)
-        .dot(x2.sub(x1))
-        .dot((k * a.mass) / M)
-    );
+    a.v = v1.add(x2.sub(x1).mul(v2.sub(v1).dot(x2.sub(x1)) * k * b.mass * M * d));
+    b.v = v2.add(x1.sub(x2).mul(v1.sub(v2).dot(x1.sub(x2)) * k * a.mass * M * d));
+
+    // a.v = v1.sub(
+    //   x1
+    //     .sub(x2)
+    //     .mul(v1.sub(v2))
+    //     .mul(x1.sub(x2))
+    //     .mul(k * b.mass * M)
+    //     .mul(d)
+    // );
+    // b.v = v2.sub(
+    //   x2
+    //     .sub(x1)
+    //     .mul(v2.sub(v1))
+    //     .mul(x2.sub(x1))
+    //     .mul(k * a.mass * M)
+    //     .mul(d)
+    // );
   }
 
   calcHitTime(a, b) {
@@ -84,8 +91,8 @@ class Simulation {
 
     const f =
       b instanceof Body
-        ? t => b.v.sub(a.v).dot(t).add(b.r).sub(a.r).abs - r - c
-        : t => b.distance({ r: a.v.dot(t).add(a.r) }).abs - r - c;
+        ? t => b.v.sub(a.v).mul(t).add(b.r).sub(a.r).abs - r - c
+        : t => b.distance({ r: a.v.mul(t).add(a.r) }).abs - r - c;
 
     const dt = newton({ f });
     return isNaN(dt) ? -2 * this.dt * this.timeSpeed : dt;
