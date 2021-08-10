@@ -1,14 +1,10 @@
-const REFRESH_RATE_HZ = 240;
-
 class Field2d {
-  constructor({ bodies = [], walls = [], scale, width, height }) {
-    this.scale = scale || 1;
+  constructor({ bodies = [], walls = [], scale = 1, width, height }) {
+    this.scale = scale;
     this.width = width;
     this.height = height;
     this.bodies = bodies;
     this.walls = walls;
-    this.timePerDraw = 1000 / REFRESH_RATE_HZ;
-    this.prevDraw = Date.now() - this.timePerDraw;
   }
   static width = Symbol('width');
   static height = Symbol('height');
@@ -22,9 +18,6 @@ class Field2d {
     this.walls.push(w);
     return w;
   }
-  canDraw() {
-    return Date.now() - this.prevDraw > this.timePerDraw;
-  }
   draw() {}
 }
 
@@ -32,10 +25,6 @@ class CanvasField2d extends Field2d {
   constructor({ bodies, walls, fieldId, scale = 1, width = 0, height = 0 }) {
     super({ bodies, walls, scale, width, height });
     this.canvas = document.getElementById(fieldId);
-    this.width = this.width || this.getStyle('body', 'width');
-    this.height = this.height || this.getStyle('body', 'height');
-    canvas.width = this.width;
-    canvas.height = this.height;
     this.ctx = canvas.getContext('2d');
     this.ctx.scale(this.scale, this.scale);
   }
@@ -45,7 +34,9 @@ class CanvasField2d extends Field2d {
   }
 
   draw() {
-    if (!this.canDraw()) return;
+    canvas.width = this.width || this.getStyle('body', 'width');
+    canvas.height = this.height || this.getStyle('body', 'height');
+
     this.prevDraw = Date.now();
 
     this.ctx.clearRect(

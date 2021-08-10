@@ -1,4 +1,5 @@
 const STEP_DELTA = 4; // 4 is min
+const FPS = 120;
 
 class Simulation {
   /*
@@ -13,14 +14,14 @@ class Simulation {
    */
 
   constructor({ field, doHit, timeSpeed, gravity }) {
-    this.bodies = field.bodies;
     this.field = field;
     this.doHit = doHit;
     this.gravity = gravity;
-    this.workCycle = null;
     this.timeSpeed = timeSpeed;
+    this.cadrs = [];
+    this.workCycle = null;
+    this.drawCycle = null;
     this.dt = STEP_DELTA / 1000;
-    this.step = 0;
   }
 
   hitBodiesPerCollisions() {
@@ -32,13 +33,11 @@ class Simulation {
           const els = [bodies[i], c[j]];
           if (!this.isCollision(...els)) continue;
 
-          console.log(`hit, step: ${this.step}`);
-
           const dt = this.calcHitTime(...els);
           els.filter(a => a instanceof Body).forEach(a => a.movePerVector(dt));
           this.hitBodies(...els);
           els.filter(a => a instanceof Body).forEach(a => a.movePerVector(-dt));
-          //    i = j = 0;
+          i = j = 0;
         }
       });
     }
@@ -60,23 +59,6 @@ class Simulation {
 
     a.v = v1.add(x2.sub(x1).mul(v2.sub(v1).dot(x2.sub(x1)) * k * b.mass * M * d));
     b.v = v2.add(x1.sub(x2).mul(v1.sub(v2).dot(x1.sub(x2)) * k * a.mass * M * d));
-
-    // a.v = v1.sub(
-    //   x1
-    //     .sub(x2)
-    //     .mul(v1.sub(v2))
-    //     .mul(x1.sub(x2))
-    //     .mul(k * b.mass * M)
-    //     .mul(d)
-    // );
-    // b.v = v2.sub(
-    //   x2
-    //     .sub(x1)
-    //     .mul(v2.sub(v1))
-    //     .mul(x2.sub(x1))
-    //     .mul(k * a.mass * M)
-    //     .mul(d)
-    // );
   }
 
   calcHitTime(a, b) {
@@ -90,21 +72,21 @@ class Simulation {
     (2*(u**2 - 2*u*v + U**2 - 2*U*V + v**2 + V**2))*/
 
     const f =
-      b instanceof Body
-        ? t => b.v.sub(a.v).mul(t).add(b.r).sub(a.r).abs - r - c
-        : t => b.distance({ r: a.v.mul(t).add(a.r) }).abs - r - c;
+      b instanceof Wall
+        ? t => b.distance({ r: a.v.mul(t).add(a.r) }).abs - r - c
+        : t => b.v.sub(a.v).mul(t).add(b.r).sub(a.r).abs - r - c;
 
     const dt = newton({ f });
     return isNaN(dt) ? -2 * this.dt * this.timeSpeed : dt;
   }
 
   moveBodiesPerVectors() {
-    this.bodies.forEach(b => b.movePerVector(this.dt * this.timeSpeed));
+    this.field.bodies.forEach(b => b.movePerVector(this.dt * this.timeSpeed));
   }
 
   changeAllVectorsByInfluence() {
-    for (const a of this.bodies) {
-      for (const b of this.bodies.filter(b => b !== a)) {
+    for (const a of this.field.bodies) {
+      for (const b of this.field.bodies.filter(b => b !== a)) {
         a.changeVectorsByInfluence(this.dt * this.timeSpeed, b);
       }
     }
@@ -115,7 +97,8 @@ class Simulation {
   }
 
   start() {
-    this.workCycle = setInterval(this.tick.bind(this), this.dt * 1000);
+    this.workCycle = setInterval(() => this.tick(), this.dt * 1000);
+    this.drawCycle = this.drawCycle || setInterval(() => this.field.draw(), 1000 / FPS);
   }
 
   stop() {
@@ -123,10 +106,8 @@ class Simulation {
   }
 
   tick() {
-    this.step++;
     this.moveBodiesPerVectors();
     if (this.doHit) this.hitBodiesPerCollisions();
     if (this.gravity) this.changeAllVectorsByInfluence();
-    this.field.draw();
   }
 }

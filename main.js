@@ -6,9 +6,10 @@ function main() {
       new Body(500, 1, [100, 100], [0, 0]),
       new Body(500, 1, [200, 100], [0, 0]),
       new Body(700, 1, [200, 300], [0, -150]),
-      new Body(500, 0, [300, 200], [-30, 0]),
-      new Body(700, 0, [100, 200], [30, 0]),
-      new Body(700, 1, [210, 210], [35, 0]),
+      new Body(500, 0, [300, 200], [-300, 0]),
+      new Body(500, 1, [200, 300], [0, 0]),
+      new Body(2000, 0, [300, 300], [400, 0]),
+      new Body(700, 1, [210, 210], [3500, 0]),
     ],
     walls: [
       new Wall(0, 0, 0, h),
@@ -17,12 +18,6 @@ function main() {
       new Wall(0, h, w, 0),
       new Wall(0, h / 2, w / 4, 100)
     ],
-    // walls: [
-    //   new Wall(0, 0, 0, h),
-    //   new Wall(0, 0, w, 0),
-    //   new Wall(w, h, 0, h),
-    //   new Wall(w, h, w, 0),
-    // ],
     fieldId: 'canvas',
     scale: 1,
   });
@@ -31,7 +26,7 @@ function main() {
     field,
     timeSpeed: 1,
     doHit: true,
-    gravity: !true,
+    gravity: true,
   });
 
   // debug
