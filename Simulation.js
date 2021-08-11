@@ -46,7 +46,7 @@ class Simulation {
   hitBodies(a, b) {
     if (b instanceof Wall)
       return (a.v = b.d
-        .mul(1 / b.d.abs ** 2)
+        .mul(1 / b.d.norm ** 2)
         .mul(2 * b.d.dot(a.v))
         .sub(a.v));
 
@@ -54,7 +54,7 @@ class Simulation {
     const [v1, v2] = [a.v.copy(), b.v.copy()];
 
     const M = 1 / (a.mass + b.mass);
-    const d = x1.sub(x2).abs ** -2;
+    const d = x1.sub(x2).norm ** -2;
     const k = (a.hardness + b.hardness) / 2 + 1;
 
     a.v = v1.add(x2.sub(x1).mul(v2.sub(v1).dot(x2.sub(x1)) * k * b.mass * M * d));
@@ -73,8 +73,8 @@ class Simulation {
 
     const f =
       b instanceof Wall
-        ? t => b.distance({ r: a.v.mul(t).add(a.r) }).abs - r - c
-        : t => b.v.sub(a.v).mul(t).add(b.r).sub(a.r).abs - r - c;
+        ? t => b.distance({ r: a.v.mul(t).add(a.r) }).norm - r - c
+        : t => b.v.sub(a.v).mul(t).add(b.r).sub(a.r).norm - r - c;
 
     const dt = newton({ f });
     return isNaN(dt) ? -2 * this.dt * this.timeSpeed : dt;
@@ -93,7 +93,7 @@ class Simulation {
   }
 
   isCollision(a, b) {
-    return b.distance(a).abs <= a.radius + (b.radius || 0);
+    return b.distance(a).norm <= a.radius + (b.radius || 0);
   }
 
   start() {

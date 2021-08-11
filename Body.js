@@ -36,8 +36,8 @@ class Body {
     if (!(b instanceof Body)) throw new TypeError('Argument is not a Body');
     const dr = this.distance(b);
   
-    const a = b.mass / (dr.abs ** 2);
-    this.v = this.v.add(dr.mul(a * dt / dr.abs))
+    const a = b.mass / (dr.norm ** 2);
+    this.v = this.v.add(dr.mul(a * dt / dr.norm))
   }
   
   distance(b) {
