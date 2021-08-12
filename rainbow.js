@@ -1,6 +1,13 @@
 const COLOR_SIZE = 30_000;
 const COLOR_STEP = 1500;
 
+/**
+ * Generates function that gives colors in rainbow sequence
+ * @param {Object} options
+ * @param {number} [options.shift=0] shift of rainbow
+ * @param {number} [options.step=1] step of rainbow
+ * @returns {function(): string} rainbow function
+ */
 const rainbowGenerator = ({ shift = 0, step = 1 }) => {
   const colors = new Array(COLOR_SIZE).fill('');
 

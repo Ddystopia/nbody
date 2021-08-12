@@ -1,19 +1,21 @@
-const STEP_DELTA = 4; // 4 is min
+/** Time in missiseconds between steps */
+const STEP_DELTA = 4;
+/** Frames per second to draw */
 const FPS = 120;
 
+/** Represents simulation */
 class Simulation {
-  /*
-   * @constructor
+  /**
+   * @param {Object} options
    *
-   * @param config
-   *
-   * @param {Body[]} config.bodies bodies for simulation
-   * @param {Field2d} config.field id of canvas to draw
-   * @param {boolean} config.doHit is bodies hits each other
+   * @param {Field2d} options.field field of simulation
+   * @param {number} options.timeSpeed speed of the time
+   * @param {boolean} options.doHit is bodies hits each other
+   * @param {boolean} options.graviry is bodies attract each other
    *
    */
 
-  constructor({ field, doHit, timeSpeed, gravity }) {
+  constructor({ field, timeSpeed, gravity, doHit }) {
     this.field = field;
     this.doHit = doHit;
     this.gravity = gravity;
@@ -24,6 +26,20 @@ class Simulation {
     this.dt = STEP_DELTA / 1000;
   }
 
+  /** Starts simulation */
+  start() {
+    this.workCycle = setInterval(() => this.tick(), this.dt * 1000);
+    this.drawCycle = this.drawCycle || setInterval(() => this.field.draw(), 1000 / FPS);
+  }
+
+  /** Stops simulation */
+  stop() {
+    clearInterval(this.workCycle);
+  }
+
+  /**
+   * Makes all body x body and body x wall hits per tick
+   */
   hitBodiesPerCollisions() {
     const bodies = this.field.bodies;
     const walls = this.field.walls;
@@ -43,10 +59,15 @@ class Simulation {
     }
   }
 
+  /**
+   * Does body x body or body x wall hit
+   * @param {Body} a First body to hit
+   * @param {(Body | Wall)} b Second body to hit
+   */
   hitBodies(a, b) {
     if (b instanceof Wall)
       return (a.v = b.d
-        .mul(1 / b.d.norm ** 2)
+        .mul(1 / b.d.norm() ** 2)
         .mul(2 * b.d.dot(a.v))
         .sub(a.v));
 
@@ -54,13 +75,18 @@ class Simulation {
     const [v1, v2] = [a.v.copy(), b.v.copy()];
 
     const M = 1 / (a.mass + b.mass);
-    const d = x1.sub(x2).norm ** -2;
+    const d = x1.sub(x2).norm() ** -2;
     const k = (a.hardness + b.hardness) / 2 + 1;
 
     a.v = v1.add(x2.sub(x1).mul(v2.sub(v1).dot(x2.sub(x1)) * k * b.mass * M * d));
     b.v = v2.add(x1.sub(x2).mul(v1.sub(v2).dot(x1.sub(x2)) * k * a.mass * M * d));
   }
 
+  /**
+   * Calcs time to hit of two objects
+   * @param {Body} a First body
+   * @param {(Body | Wall)} b Second body
+   */
   calcHitTime(a, b) {
     // TODO: include acceleration of gravity
     const c = 0.5;
@@ -73,17 +99,19 @@ class Simulation {
 
     const f =
       b instanceof Wall
-        ? t => b.distance({ r: a.v.mul(t).add(a.r) }).norm - r - c
-        : t => b.v.sub(a.v).mul(t).add(b.r).sub(a.r).norm - r - c;
+        ? t => b.distance({ r: a.v.mul(t).add(a.r) }).norm() - r - c
+        : t => b.v.sub(a.v).mul(t).add(b.r).sub(a.r).norm() - r - c;
 
     const dt = newton({ f });
     return isNaN(dt) ? -2 * this.dt * this.timeSpeed : dt;
   }
 
+  /** Moves all bodies for vectors */
   moveBodiesPerVectors() {
     this.field.bodies.forEach(b => b.movePerVector(this.dt * this.timeSpeed));
   }
 
+  /** Changes all velocity vectors by gravity influence */
   changeAllVectorsByInfluence() {
     for (const a of this.field.bodies) {
       for (const b of this.field.bodies.filter(b => b !== a)) {
@@ -92,19 +120,16 @@ class Simulation {
     }
   }
 
+  /**
+   * Checks is collision between two bodies
+   * @param {Body} a First body
+   * @param {(Body|Wall)} b First body
+   */
   isCollision(a, b) {
-    return b.distance(a).norm <= a.radius + (b.radius || 0);
+    return b.distance(a).norm() <= a.radius + (b.radius || 0);
   }
 
-  start() {
-    this.workCycle = setInterval(() => this.tick(), this.dt * 1000);
-    this.drawCycle = this.drawCycle || setInterval(() => this.field.draw(), 1000 / FPS);
-  }
-
-  stop() {
-    clearInterval(this.workCycle);
-  }
-
+  /** Make one simulation step */
   tick() {
     this.moveBodiesPerVectors();
     if (this.doHit) this.hitBodiesPerCollisions();

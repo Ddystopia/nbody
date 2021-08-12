@@ -1,29 +1,56 @@
+/** Abstact class that represents a 2d field */
 class Field2d {
+  /**
+   * @abstract
+   * @param {Object} options
+   * @param {Body[]} [options.bodies=[]] Bodies of field
+   * @param {Wall[]} [options.walls=[]] Walls of field
+   * @param {number} [options.scale=1] Scale of field
+   * @param {number} options.width Width of field
+   * @param {number} options.height Width of field
+   */
   constructor({ bodies = [], walls = [], scale = 1, width, height }) {
-    this.scale = scale;
+    /** Width of field
+     * @type {number} */
     this.width = width;
+    /** Height of field
+     * @type {number} */
     this.height = height;
+    /** Scale of field
+     * @type {number} */
+    this.scale = scale;
+    /** Bodies of field
+     * @type {Body[]} */
     this.bodies = bodies;
+    /** Walls of field
+     * @type {Wall[]} */
     this.walls = walls;
   }
   static width = Symbol('width');
   static height = Symbol('height');
-  body(mass, hardness, pos, vec, density = 1) {
-    const b = new Body(mass, hardness, pos, vec, density, this);
-    this.bodies.push(b);
-    return b;
-  }
-  wall(x0, y0, x, y) {
-    const w = new Wall(x0, y0, x, y);
-    this.walls.push(w);
-    return w;
-  }
+
+  /**
+   * Draw frame
+   * @abstract
+   */
   draw() {}
 }
 
+/** Represents Canvas Field2d */
 class CanvasField2d extends Field2d {
+  /**
+   * @param {Object} options
+   * @param {string} options.fieldId Id of canvas to draw
+   * @param {Body[]} [options.bodies=[]] Bodies of field
+   * @param {Wall[]} [options.walls=[]] Walls of field
+   * @param {number} [options.scale=1] Scale of field
+   * @param {number} [options.width=screen width] Width of field
+   * @param {number} [options.height=screen height] Height of field
+   */
   constructor({ bodies, walls, fieldId, scale = 1, width = 0, height = 0 }) {
     super({ bodies, walls, scale, width, height });
+    /** Canvas
+     * @type {Canvas} */
     this.canvas = document.getElementById(fieldId);
     this.ctx = canvas.getContext('2d');
     this.ctx.scale(this.scale, this.scale);
@@ -32,6 +59,9 @@ class CanvasField2d extends Field2d {
   getStyle(tagName, style) {
     return parseInt(getComputedStyle(document.querySelector(tagName))[style]);
   }
+  /**
+   * Draw frame
+   */
 
   draw() {
     canvas.width = this.width || this.getStyle('body', 'width');
@@ -49,7 +79,10 @@ class CanvasField2d extends Field2d {
     this.bodies.forEach(this.drawBody.bind(this));
     this.walls.forEach(this.drawWall.bind(this));
   }
-
+  /**
+   * Draw body
+   * @param {Body} body
+   */
   drawBody({ x, y, radius, color }) {
     const circle = new Path2D();
     circle.moveTo(x, y);
@@ -57,7 +90,10 @@ class CanvasField2d extends Field2d {
     this.ctx.fillStyle = color;
     this.ctx.fill(circle);
   }
-
+  /**
+   * Draw wall
+   * @param {Wall} wall
+   */
   drawWall({ r, d, color }) {
     const wall = new Path2D();
     wall.moveTo(...r);
